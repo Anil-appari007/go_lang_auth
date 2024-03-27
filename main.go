@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	utils "go_lang_auth/Utils"
+	"go_lang_auth/handlers"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -92,11 +93,11 @@ func LoginUser(c *gin.Context) {
 
 func GetItems(c *gin.Context) {
 	AuthToken := c.Request.Header.Get("Authorization")
-	// fmt.Println(AuthToken)
+	fmt.Println(AuthToken)
 	splitToken := strings.Split(AuthToken, " ")
-	// fmt.Println(splitToken)
+	fmt.Println(splitToken)
 	Token := splitToken[1]
-	// fmt.Println(Token)
+	fmt.Println(Token)
 	err := utils.ParseToken(Token, jwtSecret)
 	if utils.ReturnIfError(err, 400, c, "Auth Token Parse") {
 		return
@@ -119,5 +120,14 @@ func main() {
 	router.POST("/signin", LoginUser)
 
 	router.GET("/items", GetItems)
+	router.POST("/upload", handlers.FileUpload)
+
+	auth := router.Group("/auth")
+	{
+		auth.GET("/status2", handlers.ValidateToken, handlers.Status)
+
+	}
+	router.Static("/static", "./static")
 	router.Run("localhost:8082")
+
 }
